@@ -1,0 +1,28 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+environs = "*"
+celery = "*"
+celery-progress = "*"
+django-debug-toolbar = "*"
+django-appconf = "*"
+django-celery-beat = "*"
+django-environ = "*"
+django-model-utils = "*"
+django-simple-history = "*"
+django-solo = "*"
+redis = "*"
+selenium = "*"
+flower = "*"
+
+[dev-packages]
+flake8 = "*"
+isort = "*"
+ipdb = "*"
+
+[requires]
+python_version = "3.10"
