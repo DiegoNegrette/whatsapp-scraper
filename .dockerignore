@@ -1,5 +1,6 @@
 Dockerfile
 Makefile
+Makefile.linux
 NOTES.md
 docker-compose.*
 docker-compose-prod.*

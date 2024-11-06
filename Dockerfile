@@ -1,15 +1,17 @@
 FROM python:3.10.4
 
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DJANGO_PORT 8000
 
 VOLUME ["/code"]
 
 COPY ./Pipfile ./
+COPY ./Pipfile.lock ./
 
 RUN python -m pip install --upgrade pip && \
   pip install pipenv && \
-  pipenv install --system --skip-lock --dev && \
+  pipenv install --system --dev && \
   rm -f Pipfile Pipfile.lock
 
 # Add a text editor
