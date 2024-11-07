@@ -1,4 +1,3 @@
-import datetime
 import logging
 
 import requests
@@ -37,14 +36,6 @@ class PracticeHubAPI:
                 "params": {},
             },
         }
-
-    def log_info(self, obj):
-        now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        logger.info(f"[{now}] {obj}")
-
-    def log_error(self, obj):
-        now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        logger.error(f"[{now}] {obj}")
 
     def _validate_parameters(self, data, expected_keys):
         if not all(param in data for param in expected_keys):

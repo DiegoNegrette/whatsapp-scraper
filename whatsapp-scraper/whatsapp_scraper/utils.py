@@ -1,7 +1,10 @@
+from datetime import datetime
 import os
 import stat
 import random
 import numpy as np
+
+from django.utils import timezone
 
 
 def create_directory(directory):
@@ -58,3 +61,14 @@ def get_random_fingerprint_config(seed=None):
         "seed": seed,
         # 'fp_protector': fp_protector,
     }
+
+
+def convert_datetime_str_to_aware(date_str, date_format):
+    # Parse the string into a naive datetime (no timezone)
+    naive_appointment_date = datetime.strptime(date_str, date_format)
+    # Make the datetime timezone-aware by associating it with the Spain timezone
+    appointment_date_spain = timezone.make_aware(
+        naive_appointment_date, timezone.pytz.timezone("Europe/Madrid")
+    )
+
+    return appointment_date_spain

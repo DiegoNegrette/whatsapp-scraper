@@ -1,3 +1,18 @@
+import logging
+
+from celery import current_task
+
+
+class TaskNameFilter(logging.Filter):
+    def filter(self, record):
+        task_name = getattr(current_task, "name", None)
+        if task_name:
+            record.task_name = task_name
+        else:
+            record.task_name = "unknown_task"
+        return True
+
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -11,16 +26,30 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S",
             "style": "{",
         },
+        "task_simple": {
+            "format": "{levelname} [{asctime}] [{task_name}] {message}",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+            "style": "{",
+        },
     },
     "filters": {
         "require_debug_true": {
             "()": "django.utils.log.RequireDebugTrue",
+        },
+        "task_name_filter": {
+            "()": "service.logging.TaskNameFilter",
         },
     },
     "handlers": {
         "console": {
             "level": "INFO",
             "filters": [],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "console_task": {
+            "level": "INFO",
+            "filters": ["task_name_filter"],
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
@@ -35,6 +64,7 @@ LOGGING = {
         },
         "file_scraper": {
             "level": "INFO",
+            "filters": ["task_name_filter"],
             "class": "logging.handlers.TimedRotatingFileHandler",
             "when": "midnight",  # Rotate logs at midnight
             "interval": 1,  # Rotate logs every day
@@ -42,13 +72,14 @@ LOGGING = {
             "filename": "logs/scraper.log",
             "formatter": "simple",
         },
-        "tasks_handler": {
+        "practice_hub_handler": {
             "level": "INFO",
+            "filters": ["task_name_filter"],
             "class": "logging.handlers.TimedRotatingFileHandler",
             "when": "midnight",  # Rotate logs at midnight
             "interval": 1,  # Rotate logs every day
             "backupCount": 7,  # Keep 7 days of logs
-            "filename": "logs/tasks.log",
+            "filename": "logs/practice_hub.log",
             "formatter": "simple",
         },
     },
@@ -58,12 +89,12 @@ LOGGING = {
             "propagate": True,
         },
         "scraper": {
-            "handlers": ["console", "file_scraper"],
+            "handlers": ["console_task", "file_scraper"],
             "level": "INFO",
             "propagate": False,
         },
-        "tasks": {
-            "handlers": ["console", "tasks_handler"],
+        "practice_hub": {
+            "handlers": ["console_task", "practice_hub_handler"],
             "level": "INFO",
             "propagate": False,
         },

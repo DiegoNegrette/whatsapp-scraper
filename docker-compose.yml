@@ -48,8 +48,8 @@ services:
             bash -c ' pipenv install --system --skip-lock && python manage.py runserver 0.0.0.0:8000'
         environment:
             - DJANGO_SETTINGS_MODULE=service.settings
-
-    celery-worker:
+    
+    celery-beat:
         restart: on-failure
         image: django-whatsapp-scraper
         env_file:
@@ -57,11 +57,40 @@ services:
         volumes:
             - ./:/code
         command: >
-            bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 4 -O fair -Q main_queue --beat --scheduler django -l INFO'
+            bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service beat --beat --scheduler django -l INFO'
         depends_on:
             - rabbitmq
         networks:
             - default
+
+    celery-scraping-worker:
+        restart: on-failure
+        image: django-whatsapp-scraper
+        env_file:
+            - .env
+        volumes:
+            - ./:/code
+        command: >
+            bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q scraping_queue -l INFO'
+        depends_on:
+            - rabbitmq
+        networks:
+            - default
+    
+    celery-practice_hub-worker:
+        restart: on-failure
+        image: django-whatsapp-scraper
+        env_file:
+            - .env
+        volumes:
+            - ./:/code
+        command: >
+            bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q practice_hub_queue -l INFO'
+        depends_on:
+            - rabbitmq
+        networks:
+            - default
+
 
     chrome:
         restart: always
