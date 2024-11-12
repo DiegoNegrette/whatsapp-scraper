@@ -1,5 +1,4 @@
 import inspect
-import ipdb
 
 from django.conf import settings
 from selenium.webdriver.common.by import By

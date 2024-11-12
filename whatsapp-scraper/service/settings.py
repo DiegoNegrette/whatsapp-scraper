@@ -212,9 +212,17 @@ WEB_DRIVER_PATH = env.str("WEB_DRIVER_PATH", default="/chromedriver")
 WEB_DRIVER_URL = env.str("WEB_DRIVER_URL", default="")
 LOGIN_WEB_DRIVER_URL = env.str("LOGIN_WEB_DRIVER_URL", default="")
 DOCKER_MANAGER_SERVICE_PORT = env.int("DOCKER_MANAGER_SERVICE_PORT", default=5000)
+VNC_URL = env.str("VNC_URL", 'http://localhost:4444')
 
 USER_DATA_DIR_BASE_FOLDER = f"{BASE_DIR.parent}/seluser-data-dir"
 
 PRACTICE_HUB_ACCOUNT_DOMAIN = env.str("PRACTICE_HUB_ACCOUNT_DOMAIN", default="")
 PRACTICE_HUB_API_KEY = env.str("PRACTICE_HUB_API_KEY", default="")
 PRACTICE_HUB_CONTACT_EMAIL = env.str("PRACTICE_HUB_CONTACT_EMAIL", default="")
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = env.str("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD", default="")

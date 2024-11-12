@@ -42,7 +42,27 @@ SPA:
 
 @app.task(queue=queue_name)
 def open_whatsapp():
-    pass
+    task_name = "open_whatsapp"
+    scraper = WhatsappSiteScraper(task_identifier=task_name)
+    try:
+        scraper.init_driver()
+        scraper.bootstrap_account()
+        scraper.navigate_to(scraper.base_url)
+        MAX_ATTEMPTS = 5
+        current_attempt = 1
+        while not scraper.is_logged_in() and current_attempt <= MAX_ATTEMPTS:
+            scraper.sleep(5)
+            current_attempt += 1
+        scraper.sleep(30)
+    except KeyboardInterrupt:
+        stacktrace = "KeyboardInterrupt"
+    except Exception as e:
+        # ipdb.set_trace()
+        stacktrace = traceback.format_exc()
+        scraper.log(stacktrace)
+        scraper.log("{} Terminating".format(e))
+
+    scraper.close_driver()
 
 
 @app.task(queue=queue_name)
@@ -50,6 +70,8 @@ def send_whatsapp_remainder():
     now = timezone.now()
 
     project_config = ProjectConfiguration.get_solo()
+
+    ipdb.set_trace()
 
     target_appointments = {
         "for_first_notification": [],
@@ -74,7 +96,7 @@ def send_whatsapp_remainder():
             ),  # Appointment is tomorrow (starts at least midnight and less than 24 hours)
             first_notification_sent_at__isnull=True,  # First notification hasn't been sent yet
             patient_phone_number__isnull=False,  # Patient has a phone number
-        )
+        ).exclude(status="cancelled")
 
         # Filter out appointments where the `starts_at - hours_before_first_notification` is before now
         appointments_to_notify_for_the_first_time = appointments_to_notify.filter(
@@ -101,7 +123,7 @@ def send_whatsapp_remainder():
         starts_at__lt=end_of_today,  # Appointments starting before midnight today
         second_notification_sent_at__isnull=True,  # Second notification hasn't been sent yet
         patient_phone_number__isnull=False,  # Patient has a phone number
-    )
+    ).exclude(status="cancelled")
 
     # Further filter by time window for the second notification (starts_at - hours_before_second_notification should be before now)
     appointments_to_notify = appointments_to_notify.filter(
@@ -110,7 +132,7 @@ def send_whatsapp_remainder():
     ).values_list("id", flat=True)
 
     target_appointments["for_second_notification"] = appointments_to_notify
-
+    ipdb.set_trace()
     if len(target_appointments):
         execute_send_whatsapp_remainder.apply_async(args=[target_appointments])
 

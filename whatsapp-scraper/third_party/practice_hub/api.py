@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 from django.utils import timezone
 
-logger = logging.getLogger("scraper")
+logger = logging.getLogger("practice_hub")
 
 
 class PracticeHubAPI:
@@ -42,32 +42,24 @@ class PracticeHubAPI:
             _expected_params = ", ".join(expected_keys)
             raise Exception(f"Must specify these params: {_expected_params}")
 
-    def get_todays_appointments(self):
+    def get_future_appointments(self, page):
         cmd = "get_todays_appointments"
         url = self.BASE_URL.format(**self.api_map[cmd]["url_info"])
         # 2024-11-05
-        today = timezone.now().strftime("yyyy-mm-dd")
-        filters = f"?start=gte:{today}"
-        url += filters
-        # self.log_info(
-        #     f"[{cmd}] Requesting calls for phonenumber: {customer_phone_number}"
-        # )
-        # end_date = timezone.now()
-        # start_date = end_date - datetime.timedelta(days=365)
+        today = timezone.now().strftime("%Y-%m-%d")
+        filters = [f"start=gte:{today}", f"page={page}"]
+        url_filters = "&".join(filters)
+        url = f"{url}?{url_filters}"
+        logger.info(f"[{cmd}] Requesting appointments from: {url}")
         r = requests.get(url, headers=self.headers, timeout=self.timeout)
-        response = r.json()
-        if r.status_code == 200 and response.get("data", None):
-            return response["data"]
-        return []
+        return r
 
-    def get_patients(self):
+    def get_patients(self, page):
         cmd = "get_patients"
         url = self.BASE_URL.format(**self.api_map[cmd]["url_info"])
-        # self.log_info(
-        #     f"[{cmd}] Requesting calls for phonenumber: {customer_phone_number}"
-        # )
+        filters = [f"page={page}"]
+        url_filters = "&".join(filters)
+        url = f"{url}?{url_filters}"
+        logger.info(f"[{cmd}] Requesting patients from: {url}")
         r = requests.get(url, headers=self.headers, timeout=self.timeout)
-        response = r.json()
-        if r.status_code == 200 and response.get("data", None):
-            return response["data"]
-        return []
+        return r

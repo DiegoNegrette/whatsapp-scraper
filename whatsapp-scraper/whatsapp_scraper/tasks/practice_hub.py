@@ -1,4 +1,6 @@
 from dateutil.relativedelta import relativedelta
+import ipdb
+import time
 
 from celery.utils.log import get_task_logger
 from django.db.models import Q
@@ -18,7 +20,20 @@ practice_hub = PracticeHubAPI()
 @app.task(queue=queue_name)
 def sync_appointments():
     logger.info("Starting sync appointment")
-    appointments = practice_hub.get_todays_appointments()
+    total_pages = 1
+    current_page = 1
+    appointments = []
+    while current_page <= total_pages:
+        r = practice_hub.get_future_appointments(page=current_page)
+        if not r.status_code == 200:
+            logger.error(f"Something went wrong: {r}")
+            return
+        response = r.json()
+        total_pages = round(response["total_entries"] / 100)
+        current_page += 1
+        appointments += response["data"]
+        time.sleep(1)
+
     id_to_appointment_dict = {
         appointment["id"]: appointment for appointment in appointments
     }
@@ -26,11 +41,11 @@ def sync_appointments():
     appointments_practice_hub_ids = id_to_appointment_dict.keys()
 
     logger.info(
-        f"Found {len(appointments_practice_hub_ids)} task{'s' if len(appointments_practice_hub_ids) > 1 else ''}"
+        f"Found {len(appointments_practice_hub_ids)} appointment{'s' if len(appointments_practice_hub_ids) > 1 else ''}"
     )
 
     existing_appointments = Appointment.objects.filter(
-        id__in=appointments_practice_hub_ids
+        practice_hub_id__in=appointments_practice_hub_ids
     )
     practice_hub_id_to_existing_appointment_obj_dict = {
         appointment.practice_hub_id: appointment
@@ -53,7 +68,7 @@ def sync_appointments():
             existing_appointment.status = appointment_new_data["status"]
             appointments_to_update.append(existing_appointment)
             logger.info(
-                f"{idx + 1} Updated appointment for {existing_appointment.patient_name} at {existing_appointment.starts_at}"  # noqa
+                f"{idx + 1}/{len(appointments_practice_hub_ids)} Updated appointment for {existing_appointment.patient_name} at {existing_appointment.starts_at}"  # noqa
             )
         else:
             # Create appointment
@@ -68,9 +83,8 @@ def sync_appointments():
             new_appointment = Appointment(**appointment_dict)
             appointments_to_create.append(new_appointment)
             logger.info(
-                f"{idx + 1} Creating appointment for {new_appointment.patient_name} at {new_appointment.starts_at}"
+                f"{idx + 1}/{len(appointments_practice_hub_ids)} Creating appointment for {new_appointment.patient_name} at {new_appointment.starts_at}"
             )
-
     Appointment.objects.bulk_update(appointments_to_update, ["starts_at", "status"])
     Appointment.objects.bulk_create(appointments_to_create)
     logger.info("Finished sync appointment")
@@ -79,19 +93,34 @@ def sync_appointments():
 @app.task(queue=queue_name)
 def sync_missing_phone_numbers():
     logger.info("Starting missing phone number sync")
+    ipdb.set_trace()
     target_appointments = Appointment.objects.filter(
-        Q(start__gt=timezone.now()), Q(patient_phone_number__isnull=True)
+        Q(starts_at__gt=timezone.now()), Q(patient_phone_number__isnull=True)
     )
-    patients = practice_hub.get_patients()
+    total_pages = 1
+    current_page = 1
+    patients = []
+    while current_page <= total_pages:
+        r = practice_hub.get_patients(page=current_page)
+        if not r.status_code == 200:
+            logger.error(f"Something went wrong: {r}")
+            return
+        response = r.json()
+        total_pages = round(response["total_entries"] / 100)
+        current_page += 1
+        patients += response["data"]
+        time.sleep(1)
+    ipdb.set_trace()
+    logger.info(f"Found {len(patients)} patient{'s' if len(patients) > 1 else ''}")
     patient_id_to_patient_info_dict = {patient["id"]: patient for patient in patients}
     appointments_to_update = []
     for appointment in target_appointments:
         pattient_info = patient_id_to_patient_info_dict.get(appointment.patient_id)
         selected_phone_number = None
-        if pattient_info and len(pattient_info["numbers"]) > 1:
+        if pattient_info and len(pattient_info["numbers"]) >= 1:
             for phone_info in pattient_info["numbers"]:
                 if phone_info["country_code"] and phone_info["number"]:
-                    selected_phone_number = f"+{phone_info['country_code']}{phone_info['number'].replace(' ', '')}"
+                    selected_phone_number = f"+{phone_info['country_code']}{phone_info['number'].replace('(','').replace(')','').replace(' ', '')}"
                     break
         if selected_phone_number:
             appointment.patient_phone_number = selected_phone_number
@@ -99,6 +128,7 @@ def sync_missing_phone_numbers():
             logger.info(
                 f"Updated missing phone number for appointment {appointment.id}"
             )
+    ipdb.set_trace()
     Appointment.objects.bulk_update(appointments_to_update, ["patient_phone_number"])
     logger.info("Finished missing phone number sync")
 
@@ -106,4 +136,4 @@ def sync_missing_phone_numbers():
 @app.task(queue=queue_name)
 def delete_older_appointments():
     one_month_ago = timezone.now() - relativedelta(months=1)
-    Appointment.objects.filter(created__lt=one_month_ago).delete()
+    Appointment.objects.filter(starts_at__lt=one_month_ago).delete()

@@ -11,9 +11,15 @@ from selenium.webdriver.common.keys import Keys
 
 from .driver.capabilities.local_storage import LocalStorage
 from .driver.capabilities.runtime_options import RuntimeOptions
-from .driver.stealth.chrome import apply_stealth_features as apply_chrome_stealth_features
+from .driver.stealth.chrome import (
+    apply_stealth_features as apply_chrome_stealth_features,
+)
 
-from ..utils import create_directory, get_random_fingerprint_config, get_random_user_agent
+from ..utils import (
+    create_directory,
+    get_random_fingerprint_config,
+    get_random_user_agent,
+)
 
 logger = logging.getLogger("scraper")
 
@@ -23,7 +29,9 @@ class ScraperBaseMixin:
     BROWSER_CHROME = "chrome"
     BROWSER_FIREFOX = "firefox"
 
-    def __init__(self, webdriver_url=settings.WEB_DRIVER_URL, task_identifier=None, **kwargs):
+    def __init__(
+        self, webdriver_url=settings.WEB_DRIVER_URL, task_identifier=None, **kwargs
+    ):
         self.driver = None
         self.sleep_total = 0
         self.webdriver_url = webdriver_url
@@ -39,7 +47,9 @@ class ScraperBaseMixin:
         # Anti bot features
         self.user_agent = None
         self.extensions_map = {}
-        self.runtime_config = {RuntimeOptions.OPTION_SCREEN_RESOLUTION: RuntimeOptions.SCREEN_RES_FULLSCREEN}
+        self.runtime_config = {
+            RuntimeOptions.OPTION_SCREEN_RESOLUTION: RuntimeOptions.SCREEN_RES_FULLSCREEN
+        }
         self.local_storage = None
         self.fp_config = None
 
@@ -66,7 +76,12 @@ class ScraperBaseMixin:
         return runtime_config
 
     def get_default_options(self):
-        options_headers = ["--disable-notifications", "--start-maximized", "--no-sandbox", "--disable-dev-shm-usage"]
+        options_headers = [
+            "--disable-notifications",
+            "--start-maximized",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+        ]
         initialize_options = {
             "chrome": webdriver.ChromeOptions,
             "firefox": webdriver.FirefoxOptions,
@@ -115,7 +130,9 @@ class ScraperBaseMixin:
 
         # some assets are not worth loading and/or take too much time to load
         if len(self.blocked_domains) > 0:
-            host_resolver_rules = ", ".join([f"MAP {d} 127.0.0.1" for d in self.blocked_domains])
+            host_resolver_rules = ", ".join(
+                [f"MAP {d} 127.0.0.1" for d in self.blocked_domains]
+            )
             options.add_argument(f"--host-resolver-rules={host_resolver_rules}")
 
         # options.add_argument("--enable-javascript")
@@ -188,7 +205,9 @@ class ScraperBaseMixin:
         self.driver = self.get_driver(options=self.options)
 
         apply_chrome_stealth_features(
-            scraper_instance=self, user_agent=self.user_agent, platform=random.choice(["Windows", "Win32"])
+            scraper_instance=self,
+            user_agent=self.user_agent,
+            platform=random.choice(["Windows", "Win32"]),
         )
 
         self.local_storage = LocalStorage(self.driver)
@@ -212,7 +231,10 @@ class ScraperBaseMixin:
         if self.account_identifier:
             webdriver_host = self.webdriver_container_host or ""
             webdriver_port = self.webdriver_container_port or ""
-            _id = f"[{webdriver_host}:{webdriver_port}]" f"[{self.account_identifier}]{task_identifier}{_label}"
+            _id = (
+                f"[{webdriver_host}:{webdriver_port}]"
+                f"[{self.account_identifier}]{task_identifier}{_label}"
+            )
         logger.info(f"{_id} {obj}")
 
     def navigate_to(self, target_url):
@@ -230,7 +252,9 @@ class ScraperBaseMixin:
             else:
                 actions = ActionChains(self.driver)
                 if character == "\n":
-                    actions.key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(Keys.SHIFT).key_up(Keys.ENTER)
+                    actions.key_down(Keys.SHIFT).key_down(Keys.ENTER).key_up(
+                        Keys.SHIFT
+                    ).key_up(Keys.ENTER)
                 else:
                     actions.send_keys(*character)
                 actions.perform()
@@ -251,7 +275,9 @@ class ScraperBaseMixin:
         while current_scroll < max_scroll_times:
             current_scroll += 1
             # Scroll down to bottom
-            self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            self.driver.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);"
+            )
 
             # Wait to load page
             SCROLL_PAUSE_TIME = random.uniform(0.05, 0.5)
@@ -282,9 +308,7 @@ class ScraperBaseMixin:
                 break
 
     def _get_xpath_translate_repr(self, attribute_to_translate):
-        xpath_contains = (
-            f'translate({attribute_to_translate}, "ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚ", "abcdefghijklmnopqrstuvwxyzáéíóú")'  # noqa
-        )
+        xpath_contains = f'translate({attribute_to_translate}, "ABCDEFGHIJKLMNOPQRSTUVWXYZÁÉÍÓÚ", "abcdefghijklmnopqrstuvwxyzáéíóú")'  # noqa
         return xpath_contains
 
     def xpath_translated_text(self):
@@ -371,7 +395,9 @@ class ScraperBaseMixin:
         element.send_keys(Keys.DELETE)
 
     def execute_cdp_cmd(self, cmd, params={}):
-        resource = f"/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+        resource = (
+            f"/session/{self.driver.session_id}/chromium/send_command_and_get_result"
+        )
         url = self.driver.command_executor._url + resource
         body = json.dumps({"cmd": cmd, "params": params})
         response = self.driver.command_executor._request("POST", url, body)

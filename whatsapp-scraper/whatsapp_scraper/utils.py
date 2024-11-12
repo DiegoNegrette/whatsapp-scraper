@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import pytz
 import stat
 import random
 import numpy as np
@@ -68,7 +69,7 @@ def convert_datetime_str_to_aware(date_str, date_format):
     naive_appointment_date = datetime.strptime(date_str, date_format)
     # Make the datetime timezone-aware by associating it with the Spain timezone
     appointment_date_spain = timezone.make_aware(
-        naive_appointment_date, timezone.pytz.timezone("Europe/Madrid")
+        naive_appointment_date, pytz.timezone("Europe/Madrid")
     )
 
     return appointment_date_spain

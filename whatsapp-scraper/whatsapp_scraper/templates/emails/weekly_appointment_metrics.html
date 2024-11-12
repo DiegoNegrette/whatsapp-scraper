@@ -1,0 +1,67 @@
+<!-- templates/emails/weekly_appointment_metrics.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Appointment Metrics</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h2>Weekly Appointment Metrics</h2>
+    <p>From: {{ start_of_week }} to {{ end_of_week }}</p>
+
+    <h3>Total Appointments: {{ total_appointments }}</h3>
+
+    <h3>Notification Summary:</h3>
+    <ul>
+        <li>First Notification Sent: {{ first_notification_rate }}% of appointments</li>
+        <li>Second Notification Sent: {{ second_notification_rate }}% of appointments</li>
+    </ul>
+
+    <h3>Appointments:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Appointment Date</th>
+                <th>First Notification Sent At</th>
+                <th>First Notification Result</th>
+                <th>Second Notification Sent At</th>
+                <th>Second Notification Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointment_data %}
+                <tr>
+                    <td>{{ appointment.patient_name }}</td>
+                    <td>{{ appointment.appointment_date }}</td>
+                    <td>{{ appointment.first_notification_sent_at }}</td>
+                    <td class="{% if appointment.first_notification_result == 'success' %}success{% else %}error{% endif %}">{{ appointment.first_notification_result }}</td>
+                    <td>{{ appointment.second_notification_sent_at }}</td>
+                    <td class="{% if appointment.second_notification_result == 'success' %}success{% else %}error{% endif %}">{{ appointment.second_notification_result }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
