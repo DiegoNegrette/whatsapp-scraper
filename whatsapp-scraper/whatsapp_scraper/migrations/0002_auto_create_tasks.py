@@ -13,7 +13,7 @@ def create_periodic_tasks(apps, schema_editor):
         PeriodicTask.objects.create(
             crontab=schedule,
             name="delete_older_appointments",
-            task="whatsapp_scraper.tasks.delete_older_appointments",
+            task="whatsapp_scraper.tasks.practice_hub.delete_older_appointments",
             start_time=now(),
         )
 
@@ -29,7 +29,7 @@ def create_periodic_tasks(apps, schema_editor):
         PeriodicTask.objects.create(
             crontab=schedule,
             name="send_notifications",
-            task="whatsapp_scraper.tasks.send_weekly_appointment_metrics_email",
+            task="whatsapp_scraper.tasks.notifications.send_weekly_appointment_metrics_email",
             start_time=now(),
         )
 
@@ -42,7 +42,7 @@ def create_periodic_tasks(apps, schema_editor):
         PeriodicTask.objects.create(
             interval=schedule,
             name="send_whatsapp_remainder",
-            task="whatsapp_scraper.tasks.send_whatsapp_remainder",
+            task="whatsapp_scraper.tasks.whatsapp.send_whatsapp_remainder",
             start_time=now(),
         )
 
@@ -56,7 +56,7 @@ def create_periodic_tasks(apps, schema_editor):
             PeriodicTask.objects.create(
                 crontab=schedule,
                 name=f"sync_appointments_{hour}",
-                task="whatsapp_scraper.tasks.sync_appointments",
+                task="whatsapp_scraper.tasks.practice_hub.sync_appointments",
                 start_time=now(),
             )
 
@@ -70,7 +70,7 @@ def create_periodic_tasks(apps, schema_editor):
             PeriodicTask.objects.create(
                 crontab=schedule,
                 name=f"sync_missing_phone_numbers_{hour}",
-                task="whatsapp_scraper.tasks.sync_missing_phone_numbers",
+                task="whatsapp_scraper.tasks.practice_hub.sync_missing_phone_numbers",
                 start_time=now(),
             )
 
