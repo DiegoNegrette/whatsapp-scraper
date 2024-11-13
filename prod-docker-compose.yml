@@ -42,7 +42,7 @@ services:
         networks:
             - default
         ports:
-            - ${DJANGO_PORT}:8000
+            - ${DJANGO_PORT}:80
         environment:
             - DJANGO_SETTINGS_MODULE=service.settings
     
