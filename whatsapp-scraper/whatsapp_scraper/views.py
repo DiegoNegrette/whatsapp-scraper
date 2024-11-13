@@ -4,11 +4,32 @@ from .models import Appointment
 from .forms import DateFilterForm
 from datetime import timedelta
 
+from django.conf import settings
+from django.db import connections
+from django.db.utils import OperationalError
 from django.http import JsonResponse
 from django.views import View
-from django.conf import settings
 
 from .tasks import open_whatsapp
+
+
+def health_check(request):
+    health_status = {
+        "database": "ok",
+    }
+
+    # Check database connection
+    try:
+        connections["default"].cursor()
+    except OperationalError:
+        health_status["database"] = "error"
+
+    # You could add more checks here (e.g., cache or external services)
+
+    overall_status = (
+        "ok" if all(value == "ok" for value in health_status.values()) else "error"
+    )
+    return JsonResponse({"status": overall_status, "details": health_status})
 
 
 # Create the task view
