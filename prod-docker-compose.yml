@@ -33,7 +33,7 @@ services:
 
     django:
         restart: on-failure
-        image: django-whatsapp-scraper
+        image: app
         env_file:
             - .env
         build:
@@ -43,20 +43,14 @@ services:
             - default
         ports:
             - ${DJANGO_PORT}:8000
-        volumes:
-            - ./:/code
-        command: >
-            bash -c ' pipenv install --system --skip-lock && python manage.py runserver 0.0.0.0:8000'
         environment:
             - DJANGO_SETTINGS_MODULE=service.settings
     
     celery-beat:
         restart: on-failure
-        image: django-whatsapp-scraper
+        image: app
         env_file:
             - .env
-        volumes:
-            - ./:/code
         command: >
             bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service beat --scheduler django -l INFO'
         depends_on:
@@ -66,11 +60,9 @@ services:
 
     celery-scraping-worker:
         restart: on-failure
-        image: django-whatsapp-scraper
+        image: app
         env_file:
             - .env
-        volumes:
-            - ./:/code
         command: >
             bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q scraping_queue -l INFO'
         depends_on:
@@ -80,11 +72,9 @@ services:
     
     celery-practice_hub-worker:
         restart: on-failure
-        image: django-whatsapp-scraper
+        image: app
         env_file:
             - .env
-        volumes:
-            - ./:/code
         command: >
             bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q practice_hub_queue -l INFO'
         depends_on:
@@ -150,36 +140,19 @@ services:
         volumes:
             - postgres:/var/lib/postgresql/data
 
-    pgadmin:
-        image: dpage/pgadmin4
-        container_name: pgadmin4_container
-        restart: always
-        ports:
-            - "8888:80"
-        env_file:
-            - .env
-        environment:
-            - PGADMIN_DEFAULT_EMAIL:${PGADMIN_DEFAULT_EMAIL}
-            - PGADMIN_DEFAULT_PASSWORD:${PGADMIN_DEFAULT_PASSWORD}
-        volumes:
-            - pgadmin-data:/var/lib/pgadmin
-
-    flower:
-        restart: on-failure
-        image: django-whatsapp-scraper
-        depends_on:
-            - rabbitmq
-        env_file:
-            - .env
-        volumes:
-            - ./:/code
-        command: >
-            bash -c '
-            pipenv install --system --skip-lock &&
-            sleep 14 &&
-            celery -A service flower --port=5555'
-        ports:
-            - "5555:5555"
+    # pgadmin:
+    #     image: dpage/pgadmin4
+    #     container_name: pgadmin4_container
+    #     restart: always
+    #     ports:
+    #         - "8888:80"
+    #     env_file:
+    #         - .env
+    #     environment:
+    #         - PGADMIN_DEFAULT_EMAIL:${PGADMIN_DEFAULT_EMAIL}
+    #         - PGADMIN_DEFAULT_PASSWORD:${PGADMIN_DEFAULT_PASSWORD}
+    #     volumes:
+    #         - pgadmin-data:/var/lib/pgadmin
 
 volumes:
     postgres:
