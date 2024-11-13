@@ -38,7 +38,7 @@ services:
             - .env
         build:
             context: ./
-            dockerfile: Dockerfile
+            dockerfile: prod.Dockerfile
         networks:
             - default
         ports:

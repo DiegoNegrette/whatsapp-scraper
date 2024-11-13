@@ -260,6 +260,10 @@ class ScraperBaseMixin:
                 actions.perform()
             time.sleep(sleep_time)
 
+    def paste_text_in_input_box_using_js(self, text, element):
+        # Use JavaScript to set the value of the input box
+        self.driver.execute_script("arguments[0].value = arguments[1];", element, text)
+
     def scroll_to_element(self, element, offset_top: int = None):
         script = "return arguments[0].scrollIntoView(true);"
         if offset_top is not None:

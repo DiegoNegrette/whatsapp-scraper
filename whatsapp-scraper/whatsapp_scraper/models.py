@@ -15,6 +15,13 @@ class ProjectConfiguration(SingletonModel):
         verbose_name="Hours before second appointment notification in the same day",
     )
 
+    name_of_the_default_whatsapp_user = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        verbose_name="Name of the default whatsapp user used by the scraper to send phone numbers",
+    )
+
     class Meta:
         verbose_name = "Project configuration"
         verbose_name_plural = "Project configurations"
@@ -67,15 +74,15 @@ class Appointment(ModifiedTimeStampMixin, TimeStampedModel):
         return f"{self.patient_name} ({self.patient_phone_number}) at {self.starts_at}"
 
     def mark_first_notification_sent(self, result):
-        self.first_notification_sent = timezone.now()
+        self.first_notification_sent_at = timezone.now()
         self.first_notification_result = result
         self.save(
-            update_fields=["first_notification_sent", "first_notification_result"]
+            update_fields=["first_notification_sent_at", "first_notification_result"]
         )
 
     def mark_second_notification_sent(self, result):
-        self.second_notification_sent = timezone.now()
+        self.second_notification_sent_at = timezone.now()
         self.second_notification_result = result
         self.save(
-            update_fields=["second_notification_sent", "second_notification_result"]
+            update_fields=["second_notification_sent_at", "second_notification_result"]
         )

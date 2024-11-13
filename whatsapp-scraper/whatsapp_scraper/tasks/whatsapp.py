@@ -1,17 +1,11 @@
 from datetime import timedelta
-import ipdb
+
+# import ipdb
 import traceback
 
 from celery.utils.log import get_task_logger
 from django.utils import timezone
 
-# from selenium import webdriver
-# from selenium.webdriver.common.action_chains import ActionChains
-# from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-# from selenium.webdriver.common.keys import Keys
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import StaleElementReferenceException
 
 from service.celery import app
@@ -70,8 +64,6 @@ def send_whatsapp_remainder():
     now = timezone.now()
 
     project_config = ProjectConfiguration.get_solo()
-
-    ipdb.set_trace()
 
     target_appointments = {
         "for_first_notification": [],
@@ -132,7 +124,6 @@ def send_whatsapp_remainder():
     ).values_list("id", flat=True)
 
     target_appointments["for_second_notification"] = appointments_to_notify
-    ipdb.set_trace()
     if len(target_appointments):
         execute_send_whatsapp_remainder.apply_async(args=[target_appointments])
 
@@ -143,33 +134,39 @@ def execute_send_whatsapp_remainder(target_appointments):
         target_appointments["for_first_notification"]
         + target_appointments["for_second_notification"]
     )
-    appointments = Appointment.objects.filter(id__in=appoinments_ids)
+    appointments = Appointment.objects.filter(id__in=appoinments_ids).order_by(
+        "starts_at"
+    )
     task_name = "send_whatsapp_remainder"
+    project_config = ProjectConfiguration.get_solo()
     scraper = WhatsappSiteScraper(task_identifier=task_name)
     try:
         scraper.init_driver()
         scraper.login()
-        ipdb.set_trace()
         for appointment in appointments:
             notification_result = None
             try:
-                scraper.start_a_new_chat(user_name="Diego")
+                scraper.start_a_new_chat(
+                    user_name=project_config.name_of_the_default_whatsapp_user
+                )
                 # scraper.send_message(appointment.patient_phone_number)
-                scraper.send_message("+34614216462")
+                scraper.send_message("+584121800402")
                 scraper.open_conversation_with_last_number()
                 max_attempts = 3
                 current_attempt = 1
                 while current_attempt <= max_attempts:
-                    scraper.log(f"Attempting to send the message ({current_attempt})")
+                    scraper.log(
+                        f"Attempt ({current_attempt}) to send the message for {appointment.patient_name} on {appointment.patient_phone_number}"
+                    )
                     try:
                         scraper.send_message(
                             BASE_MESSAGE.format(
                                 appointment.patient_name,
-                                appointment.starts_at.date,
-                                appointment.starts_at.time,
+                                appointment.starts_at.date(),
+                                appointment.starts_at.time(),
                                 appointment.patient_name,
-                                appointment.starts_at.date,
-                                appointment.starts_at.time,
+                                appointment.starts_at.date(),
+                                appointment.starts_at.time(),
                             )
                         )
                         scraper.sleep(2)

@@ -1,5 +1,4 @@
 from dateutil.relativedelta import relativedelta
-import ipdb
 import time
 
 from celery.utils.log import get_task_logger
@@ -93,7 +92,6 @@ def sync_appointments():
 @app.task(queue=queue_name)
 def sync_missing_phone_numbers():
     logger.info("Starting missing phone number sync")
-    ipdb.set_trace()
     target_appointments = Appointment.objects.filter(
         Q(starts_at__gt=timezone.now()), Q(patient_phone_number__isnull=True)
     )
@@ -110,7 +108,6 @@ def sync_missing_phone_numbers():
         current_page += 1
         patients += response["data"]
         time.sleep(1)
-    ipdb.set_trace()
     logger.info(f"Found {len(patients)} patient{'s' if len(patients) > 1 else ''}")
     patient_id_to_patient_info_dict = {patient["id"]: patient for patient in patients}
     appointments_to_update = []
@@ -128,7 +125,6 @@ def sync_missing_phone_numbers():
             logger.info(
                 f"Updated missing phone number for appointment {appointment.id}"
             )
-    ipdb.set_trace()
     Appointment.objects.bulk_update(appointments_to_update, ["patient_phone_number"])
     logger.info("Finished missing phone number sync")
 

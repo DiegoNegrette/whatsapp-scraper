@@ -90,10 +90,11 @@ class WhatsappSiteScraper(ScraperBaseMixin):
     def send_message(self, message):
         message_box = WebDriverWait(self.driver, timeout=10).until(
             EC.element_to_be_clickable(
-                (By.XPATH, "//div[@aria-placeholder='Type a message']")
+                (By.XPATH, "//div[@aria-placeholder='Type a message']/p")
             )
         )
         self.click_element(message_box)
+        self.clear_input(message_box)
         self.type_like_human(message)
         self.press_enter()
 
