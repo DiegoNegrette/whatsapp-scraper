@@ -1,14 +1,17 @@
-from django.utils import timezone
-from django.views.generic import ListView
 from .models import Appointment
 from .forms import DateFilterForm
 from datetime import timedelta
 
+
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db import connections
 from django.db.utils import OperationalError
 from django.http import JsonResponse
 from django.views import View
+from django.views.generic import ListView
+from django.utils import timezone
+from django.utils.decorators import method_decorator
 
 from .tasks import open_whatsapp
 
@@ -46,7 +49,13 @@ class TriggerTaskView(View):
             return JsonResponse({"message": f"Error: {str(e)}"}, status=500)
 
 
-class AppointmentListView(ListView):
+class AdminRequiredMixin:
+    @method_decorator(staff_member_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+
+class AppointmentListView(AdminRequiredMixin, ListView):
     model = Appointment
     template_name = "appointments/appointment_list.html"
     context_object_name = "appointments"

@@ -66,6 +66,9 @@ class Appointment(ModifiedTimeStampMixin, TimeStampedModel):
         max_length=255, choices=CH_NOTIFICATION_RESULT, null=True, blank=True
     )
 
+    # en / es
+    language = models.CharField(max_length=255, null=True, blank=True)
+
     class Meta:
         verbose_name = "Appointment"
         verbose_name_plural = "Appointments"

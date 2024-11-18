@@ -27,8 +27,9 @@
 <table class="appointment-table">
     <thead>
         <tr>
-            <th>Practice Hub ID</th>
+            <!-- <th>Practice Hub ID</th> -->
             <th>Patient Name</th>
+            <th>Language</th>
             <th>Phone Number</th>
             <th>Start Time</th>
             <th>First Notification Sent At</th>
@@ -40,8 +41,9 @@
     <tbody>
         {% for appointment in appointments %}
             <tr>
-                <td>{{ appointment.practice_hub_id }}</td>
+                <!-- <td>{{ appointment.practice_hub_id }}</td> -->
                 <td>{{ appointment.patient_name }}</td>
+                <td>{{ appointment.language }}</td>
                 <td>{{ appointment.patient_phone_number }}</td>
                 <td>{{ appointment.starts_at|date:"Y-m-d H:i" }}</td>
                 <td>{{ appointment.first_notification_sent_at|date:"Y-m-d H:i" }}</td>

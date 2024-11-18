@@ -61,7 +61,7 @@ class WhatsappSiteScraper(ScraperBaseMixin):
 
     def is_logged_in(self):
         try:
-            WebDriverWait(self.driver, timeout=10).until(
+            WebDriverWait(self.driver, timeout=60).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, "//button[@aria-label='Search or start new chat']")
                 )

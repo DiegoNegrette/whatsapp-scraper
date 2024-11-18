@@ -117,15 +117,18 @@ def sync_missing_phone_numbers():
         if pattient_info and len(pattient_info["numbers"]) >= 1:
             for phone_info in pattient_info["numbers"]:
                 if phone_info["country_code"] and phone_info["number"]:
-                    selected_phone_number = f"+{phone_info['country_code']}{phone_info['number'].replace('(','').replace(')','').replace(' ', '')}"
+                    selected_phone_number = f"+{phone_info['country_code']}{phone_info['number'].replace('(','').replace(')','').replace(' ', '').replace('-', '')}"
                     break
         if selected_phone_number:
             appointment.patient_phone_number = selected_phone_number
+            appointment.language = pattient_info["locale"]
             appointments_to_update.append(appointment)
             logger.info(
                 f"Updated missing phone number for appointment {appointment.id}"
             )
-    Appointment.objects.bulk_update(appointments_to_update, ["patient_phone_number"])
+    Appointment.objects.bulk_update(
+        appointments_to_update, ["patient_phone_number", "language"]
+    )
     logger.info("Finished missing phone number sync")
 
 

@@ -16,22 +16,23 @@ queue_name = "scraping_queue"
 logger = get_task_logger("scraper")
 
 
-BASE_MESSAGE = """ENG:
-    Hi {}, a reminder your appointment with Samuel Higgs at Advanced Quiropráctica is on {} at {}. See you there :)
+ES_MESSAGE = """Hola {}, un recordatorio de tu cita con Samuel Higgs en Advanced Quiropráctica el {} at {}. Nos vemos 😊
 
-    Warmest,
+Saludos cordiales
 
-    AQ Team
-    📍C/Trafalgar 4, 10-A
-
-SPA:
-    Hola {}, un recordatorio de tu cita con Samuel Higgs en Advanced Quiropráctica el {} at {}. Nos vemos 😊
-
-    Saludos cordiales
-
-    El equipo de AQ
-    📍C/Trafalgar 4, 10-A
+El equipo de AQ
+📍C/Trafalgar 4, 10-A
 """
+
+EN_MESSAGE = """Hi {}, a reminder your appointment with Samuel Higgs at Advanced Quiropráctica is on {} at {}. See you there :)
+
+Warmest,
+
+AQ Team
+📍C/Trafalgar 4, 10-A
+"""
+
+GET_BASE_MESSAGE = {"en": EN_MESSAGE, "es": ES_MESSAGE}
 
 
 @app.task(queue=queue_name)
@@ -95,7 +96,7 @@ def send_whatsapp_remainder():
             starts_at__lt=now
             + hours_before_first_notification  # The appointment is within the notification window (starts_at - hours_before_first_notification <= now)
         ).values_list("id", flat=True)
-        target_appointments["for_first_notification"] = (
+        target_appointments["for_first_notification"] = list(
             appointments_to_notify_for_the_first_time
         )
 
@@ -123,13 +124,13 @@ def send_whatsapp_remainder():
         + hours_before_second_notification  # The appointment should be within the notification window (starts_at - hours_before_second_notification <= now)
     ).values_list("id", flat=True)
 
-    target_appointments["for_second_notification"] = appointments_to_notify
+    target_appointments["for_second_notification"] = list(appointments_to_notify)
     if len(target_appointments):
         execute_send_whatsapp_remainder.apply_async(args=[target_appointments])
 
 
-@app.task(queue=queue_name)
-def execute_send_whatsapp_remainder(target_appointments):
+@app.task(bind=True, queue=queue_name)
+def execute_send_whatsapp_remainder(self, target_appointments):
     appoinments_ids = (
         target_appointments["for_first_notification"]
         + target_appointments["for_second_notification"]
@@ -159,6 +160,7 @@ def execute_send_whatsapp_remainder(target_appointments):
                         f"Attempt ({current_attempt}) to send the message for {appointment.patient_name} on {appointment.patient_phone_number}"
                     )
                     try:
+                        BASE_MESSAGE = GET_BASE_MESSAGE[appointment.language or "en"]
                         scraper.send_message(
                             BASE_MESSAGE.format(
                                 appointment.patient_name,
@@ -193,5 +195,7 @@ def execute_send_whatsapp_remainder(target_appointments):
         stacktrace = traceback.format_exc()
         scraper.log(stacktrace)
         scraper.log("{} Terminating".format(e))
-
-    scraper.close_driver()
+        # Retry the task if an exception occurs
+        raise self.retry(exc=e, countdown=60, max_retries=3)
+    finally:
+        scraper.close_driver()

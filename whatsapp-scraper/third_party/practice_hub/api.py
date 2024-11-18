@@ -47,7 +47,7 @@ class PracticeHubAPI:
         url = self.BASE_URL.format(**self.api_map[cmd]["url_info"])
         # 2024-11-05
         today = timezone.now().strftime("%Y-%m-%d")
-        filters = [f"start=gte:{today}", f"page={page}"]
+        filters = [f"start=gte:{today} 00:00:00", f"page={page}"]
         url_filters = "&".join(filters)
         url = f"{url}?{url_filters}"
         logger.info(f"[{cmd}] Requesting appointments from: {url}")
