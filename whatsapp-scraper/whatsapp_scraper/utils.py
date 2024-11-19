@@ -68,8 +68,7 @@ def convert_datetime_str_to_aware(date_str, date_format):
     # Parse the string into a naive datetime (no timezone)
     naive_appointment_date = datetime.strptime(date_str, date_format)
     # Make the datetime timezone-aware by associating it with the Spain timezone
-    appointment_date_spain = timezone.make_aware(
-        naive_appointment_date, pytz.timezone("Europe/Madrid")
-    )
+    zone_info = pytz.timezone("Europe/Madrid")
+    appointment_date_spain = zone_info.localize(naive_appointment_date)
 
     return appointment_date_spain

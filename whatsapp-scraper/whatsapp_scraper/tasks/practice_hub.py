@@ -93,7 +93,8 @@ def sync_appointments():
 def sync_missing_phone_numbers():
     logger.info("Starting missing phone number sync")
     target_appointments = Appointment.objects.filter(
-        Q(starts_at__gt=timezone.now()), Q(patient_phone_number__isnull=True)
+        Q(starts_at__gt=timezone.now()),
+        Q(patient_phone_number__isnull=True) | Q(language__isnull=True),
     )
     total_pages = 1
     current_page = 1

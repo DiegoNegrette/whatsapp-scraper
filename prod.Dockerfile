@@ -28,6 +28,13 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && rm -f Pipfile Pipfile.lock
 
+# Install tzdata
+RUN apt-get update && apt-get install -y tzdata
+
+# Set timezone (optional, you can also handle this at runtime)
+ENV TZ=Europe/Madrid
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Create the nginx user
 RUN useradd -r -d /nonexistent -s /bin/false nginx
 

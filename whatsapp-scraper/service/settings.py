@@ -212,7 +212,7 @@ WEB_DRIVER_PATH = env.str("WEB_DRIVER_PATH", default="/chromedriver")
 WEB_DRIVER_URL = env.str("WEB_DRIVER_URL", default="")
 LOGIN_WEB_DRIVER_URL = env.str("LOGIN_WEB_DRIVER_URL", default="")
 DOCKER_MANAGER_SERVICE_PORT = env.int("DOCKER_MANAGER_SERVICE_PORT", default=5000)
-VNC_URL = env.str("VNC_URL", 'http://localhost:4444')
+VNC_URL = env.str("VNC_URL", "http://localhost:4444")
 
 USER_DATA_DIR_BASE_FOLDER = f"{BASE_DIR.parent}/seluser-data-dir"
 

@@ -17,6 +17,13 @@ RUN python -m pip install --upgrade pip && \
 # Add a text editor
 RUN apt-get update && apt-get install -y nano dumb-init
 
+# Install tzdata
+RUN apt-get update && apt-get install -y tzdata
+
+# Set timezone (optional, you can also handle this at runtime)
+ENV TZ=Europe/Madrid
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 # Adds our application code to the image
 COPY . /code
 WORKDIR /code/whatsapp-scraper
