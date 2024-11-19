@@ -170,6 +170,7 @@ TIME_ZONE = "Europe/Madrid"  # Spain timezone (CET/CEST)
 
 USE_I18N = True
 
+# Store dates in database in UTC
 USE_TZ = True
 
 
