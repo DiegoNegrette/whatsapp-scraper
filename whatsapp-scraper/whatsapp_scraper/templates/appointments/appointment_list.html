@@ -28,6 +28,7 @@
     <thead>
         <tr>
             <!-- <th>Practice Hub ID</th> -->
+            <th>Patient ID</th>
             <th>Patient Name</th>
             <th>Language</th>
             <th>Phone Number</th>
@@ -42,6 +43,7 @@
         {% for appointment in appointments %}
             <tr>
                 <!-- <td>{{ appointment.practice_hub_id }}</td> -->
+                <td>{{ appointment.patient_id }}</td>
                 <td>{{ appointment.patient_name }}</td>
                 <td>{{ appointment.language }}</td>
                 <td>{{ appointment.patient_phone_number }}</td>

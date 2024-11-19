@@ -125,7 +125,9 @@ def send_whatsapp_remainder():
     ).values_list("id", flat=True)
 
     target_appointments["for_second_notification"] = list(appointments_to_notify)
-    if len(target_appointments):
+    if len(target_appointments["for_first_notification"]) or len(
+        target_appointments["for_second_notification"]
+    ):
         execute_send_whatsapp_remainder.apply_async(args=[target_appointments])
 
 
