@@ -70,10 +70,14 @@ class AppointmentListView(AdminRequiredMixin, ListView):
         )
         end_of_day = start_of_day + timedelta(days=1)
 
-        return Appointment.objects.filter(
-            starts_at__gte=start_of_day,
-            starts_at__lt=end_of_day,
-        ).order_by("starts_at")
+        return (
+            Appointment.objects.filter(
+                starts_at__gte=start_of_day,
+                starts_at__lt=end_of_day,
+            )
+            .exclude(status="cancelled")
+            .order_by("starts_at")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
