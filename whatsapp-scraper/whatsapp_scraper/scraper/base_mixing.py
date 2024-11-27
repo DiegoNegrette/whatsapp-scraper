@@ -102,6 +102,7 @@ class ScraperBaseMixin:
         options.add_argument("--disable-blink-features=AutomationControlled")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_argument("--disable-geolocation")
+        options.add_argument("--disable-dev-shm-usage")
 
         prefs = dict()
 
