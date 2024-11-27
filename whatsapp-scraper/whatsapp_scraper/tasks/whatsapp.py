@@ -6,7 +6,10 @@ import traceback
 from celery.utils.log import get_task_logger
 from django.utils import timezone
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import (
+    InvalidSessionIdException,
+    StaleElementReferenceException,
+)
 
 from service.celery import app
 from ..models import Appointment, ProjectConfiguration
@@ -181,6 +184,8 @@ def execute_send_whatsapp_remainder(self, target_appointments):
                     current_attempt += 1
                 if not notification_result:
                     notification_result = Appointment.NOTIFICATION_RESULT_ERROR
+            except InvalidSessionIdException as e:
+                raise e
             except Exception as e:
                 notification_result = Appointment.NOTIFICATION_RESULT_ERROR
                 stacktrace = traceback.format_exc()

@@ -39,6 +39,8 @@ services:
         build:
             context: ./
             dockerfile: prod.Dockerfile
+        volumes:
+            - whatsapp-scraper/logs/:/code/whatsapp-scraper/logs
         networks:
             - default
         ports:
@@ -63,6 +65,8 @@ services:
         image: app
         env_file:
             - .env
+        volumes:
+            - whatsapp-scraper/celery-scraping-worker-logs/:/code/whatsapp-scraper/logs
         command: >
             bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q scraping_queue -l INFO'
         depends_on:
@@ -75,6 +79,8 @@ services:
         image: app
         env_file:
             - .env
+        volumes:
+            - whatsapp-scraper/practice-hub-worker-logs/:/code/whatsapp-scraper/logs
         command: >
             bash -c ' pipenv install --system --skip-lock && sleep 14 && watchmedo auto-restart --directory=./ --pattern=*.py --recursive -- celery -A service worker --concurrency 1 -O fair -Q practice_hub_queue -l INFO'
         depends_on:
