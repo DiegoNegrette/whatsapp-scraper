@@ -177,6 +177,7 @@ def execute_send_whatsapp_remainder(self, target_appointments):
                                 starts_at.time().strftime("%H:%M"),
                             )
                         )
+                        scraper.log("Message sent")
                         scraper.sleep(2)
                         notification_result = Appointment.NOTIFICATION_RESULT_SUCCESS
                         break
@@ -194,8 +195,10 @@ def execute_send_whatsapp_remainder(self, target_appointments):
                 scraper.log("{} Going to next message".format(e))
             if appointment.id in target_appointments["for_first_notification"]:
                 appointment.mark_first_notification_sent(notification_result)
+                scraper.log("Message saved")
             if appointment.id in target_appointments["for_second_notification"]:
                 appointment.mark_second_notification_sent(notification_result)
+                scraper.log("Message saved")
     except KeyboardInterrupt:
         stacktrace = "KeyboardInterrupt"
     except Exception as e:
