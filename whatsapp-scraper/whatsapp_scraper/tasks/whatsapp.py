@@ -166,14 +166,15 @@ def execute_send_whatsapp_remainder(self, target_appointments):
                     )
                     try:
                         BASE_MESSAGE = GET_BASE_MESSAGE[appointment.language or "en"]
+                        starts_at = timezone.localtime(appointment.starts_at)
                         scraper.send_message(
                             BASE_MESSAGE.format(
                                 appointment.patient_name.split(" ")[0],
-                                appointment.starts_at.date(),
-                                appointment.starts_at.time().strftime("%H:%M"),
+                                starts_at.date(),
+                                starts_at.time().strftime("%H:%M"),
                                 appointment.patient_name,
-                                appointment.starts_at.date(),
-                                appointment.starts_at.time().strftime("%H:%M"),
+                                starts_at.date(),
+                                starts_at.time().strftime("%H:%M"),
                             )
                         )
                         scraper.sleep(2)
