@@ -82,7 +82,7 @@ def send_weekly_appointment_metrics_email():
         subject,
         message,
         settings.EMAIL_HOST_USER,  # Replace with your sender email
-        ["d.negrette42@gmail.com"],  # Replace with target email
+        [settings.EMAIL_HOST_USER],  # Replace with target email
         fail_silently=False,
         html_message=message,  # Send as HTML
     )
