@@ -1,4 +1,5 @@
 from datetime import timedelta
+import math
 
 from celery.utils.log import get_task_logger
 from django.conf import settings
@@ -51,12 +52,12 @@ def send_weekly_appointment_metrics_email():
             second_notification_count += 1
 
     # Calculate notification success rates
-    first_notification_rate = (
+    first_notification_rate = math.floor(
         (first_notification_count / total_appointments) * 100
         if total_appointments > 0
         else 0
     )
-    second_notification_rate = (
+    second_notification_rate = math.floor(
         (second_notification_count / total_appointments) * 100
         if total_appointments > 0
         else 0

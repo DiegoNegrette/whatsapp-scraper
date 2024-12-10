@@ -155,8 +155,8 @@ def execute_send_whatsapp_remainder(self, target_appointments):
                 scraper.start_a_new_chat(
                     user_name=project_config.name_of_the_default_whatsapp_user
                 )
-                # scraper.send_message(appointment.patient_phone_number)
-                scraper.send_message("+584121800402")
+                scraper.send_message(appointment.patient_phone_number)
+                # scraper.send_message("+584121800402")
                 scraper.open_conversation_with_last_number()
                 max_attempts = 3
                 current_attempt = 1
