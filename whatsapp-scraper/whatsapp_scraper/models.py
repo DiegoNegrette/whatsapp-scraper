@@ -57,6 +57,8 @@ class Appointment(ModifiedTimeStampMixin, TimeStampedModel):
     patient_phone_number = models.CharField(max_length=100, null=True, blank=True)
     starts_at = models.DateTimeField(null=False, blank=False)
     status = models.CharField(max_length=255, null=True, blank=True)
+    appointment_updated_at = models.DateTimeField(null=True, blank=True)
+
     first_notification_sent_at = models.DateTimeField(null=True, blank=True)
     first_notification_result = models.CharField(
         max_length=255, choices=CH_NOTIFICATION_RESULT, null=True, blank=True

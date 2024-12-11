@@ -64,6 +64,7 @@ def sync_appointments():
                 practice_hub_id
             ]
 
+            existing_appointment.appointment_updated_at = timezone.now()
             existing_appointment.starts_at = appointment_date_spain
             existing_appointment.status = appointment_new_data["status"]
             appointments_to_update.append(existing_appointment)
@@ -77,6 +78,7 @@ def sync_appointments():
                 "patient_id": appointment_new_data["patient_id"],
                 "patient_name": appointment_new_data["patient_name"],
                 "patient_phone_number": None,
+                "appointment_updated_at": timezone.now(),
                 "starts_at": appointment_date_spain,
                 "status": appointment_new_data["status"],
             }
@@ -85,7 +87,9 @@ def sync_appointments():
             logger.info(
                 f"{idx + 1}/{len(appointments_practice_hub_ids)} Creating appointment for {new_appointment.patient_name} at {new_appointment.starts_at}"
             )
-    Appointment.objects.bulk_update(appointments_to_update, ["starts_at", "status"])
+    Appointment.objects.bulk_update(
+        appointments_to_update, ["appointment_updated_at", "starts_at", "status"]
+    )
     Appointment.objects.bulk_create(appointments_to_create)
     logger.info("Finished sync appointment")
 

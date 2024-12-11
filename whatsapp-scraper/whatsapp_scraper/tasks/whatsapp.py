@@ -65,7 +65,7 @@ def open_whatsapp():
 
 @app.task(queue=queue_name)
 def send_whatsapp_remainder():
-    now = timezone.now()
+    now = timezone.localtime()
 
     project_config = ProjectConfiguration.get_solo()
 

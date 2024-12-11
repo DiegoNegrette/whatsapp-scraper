@@ -23,4 +23,6 @@ class AppointmentAdmin(admin.ModelAdmin):
         "first_notification_result",
         "second_notification_sent_at",
         "second_notification_result",
+        "created",
+        "modified",
     )

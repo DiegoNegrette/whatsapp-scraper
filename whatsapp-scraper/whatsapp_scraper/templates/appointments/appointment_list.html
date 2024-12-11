@@ -27,7 +27,8 @@
 <table class="appointment-table">
     <thead>
         <tr>
-            <!-- <th>Practice Hub ID</th> -->
+            <th>Practice Hub ID</th>
+            <th>Ultima actualización</th>
             <th>Patient ID</th>
             <th>Patient Name</th>
             <th>Language</th>
@@ -42,7 +43,8 @@
     <tbody>
         {% for appointment in appointments %}
             <tr>
-                <!-- <td>{{ appointment.practice_hub_id }}</td> -->
+                <td>{{ appointment.practice_hub_id }}</td>
+                <td>{{ appointment.appointment_updated_at }}</td>
                 <td>{{ appointment.patient_id }}</td>
                 <td>{{ appointment.patient_name }}</td>
                 <td>{{ appointment.language }}</td>
